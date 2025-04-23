@@ -1,48 +1,41 @@
 package edu.miu.cs.cs489.surgeries.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-@NoArgsConstructor
-@Data
-@Entity
-@Table(name = "roles")
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer roleId;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    @Column(nullable = false)
-    @NotBlank(message = "Role Name is required")
-    private String roleName;
+public enum Role {
+    ADMIN(
+            Set.of(
+                    Permission.ADMIN_WRITE,
+                    Permission.ADMIN_READ)
+    ),
+    MEMBER(
+            Set.of(
+                    Permission.ADMIN_READ)
+    );
 
-    public Role(String roleName) {
-        this.roleName = roleName;
+    private final Set<Permission> permissions;
+
+    Role(Set<Permission> permissions) {
+        this.permissions = permissions;
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    public Set<Permission> getPermissions() {
+        return permissions;
     }
 
-    public Integer getRoleId() {
-        return roleId;
-    }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = getPermissions().stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
+                .collect(Collectors.toList());
 
-    public String getRoleName() {
-        return roleName;
-    }
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + name()));
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "roleId=" + roleId +
-                ", roleName='" + roleName + '\'' +
-                '}';
+        return authorities;
     }
 }
