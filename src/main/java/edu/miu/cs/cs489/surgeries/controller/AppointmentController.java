@@ -1,10 +1,12 @@
 package edu.miu.cs.cs489.surgeries.controller;
 
 import edu.miu.cs.cs489.surgeries.dto.request.AppointmentRequestDto;
+import edu.miu.cs.cs489.surgeries.dto.response.AppointmentResponseDto;
 import edu.miu.cs.cs489.surgeries.service.AppointmentService;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,31 @@ import java.time.LocalDate;
 public class AppointmentController {
     @Autowired
     private AppointmentService appointmentService;
+
+    @GetMapping("/dentist/{dentistId}")
+    public ResponseEntity<?> getAppointmentsByDentistId(@PathVariable Integer dentistId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "5") int pageSize,
+                                                        @RequestParam(defaultValue = "appointmentId") String sortBy,
+                                                        @RequestParam(defaultValue = "asc") String sortDirection) {
+        Page<AppointmentResponseDto> appointmentResponseDtos = appointmentService.findByDentistId(dentistId,
+                page, pageSize, sortBy, sortDirection);
+
+        return new ResponseEntity<>(appointmentResponseDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/surgery/{surgeryId}")
+    public ResponseEntity<?> getAppointmentsBySurgeryId(@PathVariable Integer surgeryId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "5") int pageSize,
+                                                        @RequestParam(defaultValue = "appointmentId") String sortBy,
+                                                        @RequestParam(defaultValue = "asc") String sortDirection) {
+
+        Page<AppointmentResponseDto> appointmentResponseDtos = appointmentService.findBySurgeryId(surgeryId,
+                page, pageSize, sortBy, sortDirection);
+
+        return new ResponseEntity<>(appointmentResponseDtos, HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<?> getAppointments(@RequestParam(required = false)
@@ -31,16 +58,6 @@ public class AppointmentController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<?> getAppointmentsByPatientId(@PathVariable Integer patientId) {
         return new ResponseEntity<>(appointmentService.findByPatientId(patientId), HttpStatus.OK);
-    }
-
-    @GetMapping("/dentist/{dentistId}")
-    public ResponseEntity<?> getAppointmentsByDentistId(@PathVariable Integer dentistId) {
-        return new ResponseEntity<>(appointmentService.findByDentistId(dentistId), HttpStatus.OK);
-    }
-
-    @GetMapping("/surgery/{surgeryId}")
-    public ResponseEntity<?> getAppointmentsBySurgeryId(@PathVariable Integer surgeryId) {
-        return new ResponseEntity<>(appointmentService.findBySurgeryId(surgeryId), HttpStatus.OK);
     }
 
     @GetMapping("/{appointmentId}")

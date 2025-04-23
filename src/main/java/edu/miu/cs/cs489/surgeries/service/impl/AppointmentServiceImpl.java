@@ -15,6 +15,10 @@ import edu.miu.cs.cs489.surgeries.repository.SurgeryRepository;
 import edu.miu.cs.cs489.surgeries.service.AppointmentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,6 +43,34 @@ public class AppointmentServiceImpl implements AppointmentService {
     private AppointmentMapper appointmentMapper;
 
     @Override
+    public Page<AppointmentResponseDto> findByDentistId(Integer dentistId, int page, int pageSize, String sortBy, String sortDirection) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.Direction.fromString(sortDirection), sortBy);
+
+        Optional<Dentist> dentist = dentistRepository.findById(dentistId);
+
+        if (dentist.isPresent()) {
+            Page<Appointment> appointmentPage = appointmentRepository.findByDentist(dentist.get(), pageable);
+
+            return appointmentPage.map(appointmentMapper::appointmentToAppointmentResponseDto);
+        }
+        throw new NotFoundException("Dentist with id " + dentistId + " not found");
+    }
+
+    @Override
+    public Page<AppointmentResponseDto> findBySurgeryId(Integer surgeryId, int page, int pageSize, String sortBy, String sortDirection) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.Direction.fromString(sortDirection), sortBy);
+
+        Optional<Surgery> surgery = surgeryRepository.findById(surgeryId);
+
+        if (surgery.isPresent()) {
+            Page<Appointment> appointmentPage = appointmentRepository.findBySurgery(surgery.get(), pageable);
+
+            return appointmentPage.map(appointmentMapper::appointmentToAppointmentResponseDto);
+        }
+        throw new NotFoundException("Surgery with id " + surgeryId + " not found");
+    }
+
+    @Override
     public List<AppointmentResponseDto> getAllAppointments() {
         return appointmentMapper.appointmentsToAppointmentResponseDtoList(appointmentRepository.findAll());
     }
@@ -52,29 +84,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointmentRepository.findByPatient(patient.get()));
         }
         throw new NotFoundException("Patient with id " + patientId + " not found");
-    }
-
-    @Override
-    public List<AppointmentResponseDto> findByDentistId(Integer dentistId) {
-        Optional<Dentist> dentist = dentistRepository.findById(dentistId);
-
-        if (dentist.isPresent()) {
-            return appointmentMapper.appointmentsToAppointmentResponseDtoList(
-                    appointmentRepository.findByDentist(dentist.get()));
-        }
-        throw new NotFoundException("Dentist with id " + dentistId + " not found");
-    }
-
-    @Override
-    public List<AppointmentResponseDto> findBySurgeryId(Integer surgeryId) {
-        Optional<Surgery> surgery = surgeryRepository.findById(surgeryId);
-
-        if (surgery.isPresent()) {
-            return appointmentMapper.appointmentsToAppointmentResponseDtoList(
-                    appointmentRepository.findBySurgery(surgery.get())
-            );
-        }
-        throw new NotFoundException("Surgery with id " + surgeryId + " not found");
     }
 
     @Override
