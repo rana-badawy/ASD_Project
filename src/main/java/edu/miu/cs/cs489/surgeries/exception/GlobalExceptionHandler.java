@@ -14,14 +14,25 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiError> handleSatelliteNotFoundException(NotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<ApiError> handleNotFoundException(NotFoundException e, HttpServletRequest request) {
         ApiError apiError = new ApiError(
                 e.getMessage(),
                 request.getRequestURI(),
                 HttpStatus.NOT_FOUND.value(),
                 Instant.now()
         );
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ApiError> handleDuplicateException(DuplicateException e, HttpServletRequest request) {
+        ApiError apiError = new ApiError(
+                e.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.CONFLICT.value(),
+                Instant.now()
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
