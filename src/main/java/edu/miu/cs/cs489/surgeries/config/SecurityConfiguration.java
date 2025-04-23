@@ -9,13 +9,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +33,21 @@ public class SecurityConfiguration {
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
+    private AuthorizationManager<RequestAuthorizationContext> getAuthorizationManager() {
+        return (Supplier<Authentication> authenticationSupplier, RequestAuthorizationContext context) -> {
+            String method = context.getRequest().getMethod();
+            Authentication authentication = authenticationSupplier.get();
+
+            if ("GET".equalsIgnoreCase(method)) {
+                return new AuthorizationDecision(authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_MEMBER")));
+            } else {
+                return new AuthorizationDecision(authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN")));
+            }
+        };
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(CsrfConfigurer::disable)
@@ -34,7 +55,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
                                 .requestMatchers("/api/v1/auth/*").permitAll()
-                                .requestMatchers("/api/v1/surgeries/**").hasAnyRole("ADMIN", "MEMBER")
+                                .requestMatchers("/api/v1/**").access(getAuthorizationManager())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

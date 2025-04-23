@@ -31,12 +31,22 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = jwtService.parseSignedClaims(token).getSubject();
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                SecurityContextHolder.getContext().setAuthentication(
-                        new UsernamePasswordAuthenticationToken(
-                                userDetailsService.loadUserByUsername(username),
-                                userDetailsService.loadUserByUsername(username).getAuthorities()
-                        )
+                var userDetails = userDetailsService.loadUserByUsername(username);
+
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
                 );
+
+                  SecurityContextHolder.getContext().setAuthentication(authToken);
+//
+//                SecurityContextHolder.getContext().setAuthentication(
+//                        new UsernamePasswordAuthenticationToken(
+//                                userDetailsService.loadUserByUsername(username),
+//                                userDetailsService.loadUserByUsername(username).getAuthorities()
+//                        )
+//                );
             }
         }
         filterChain.doFilter(request, response);
