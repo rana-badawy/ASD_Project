@@ -7,7 +7,7 @@ services:
       - 'MYSQL_ROOT_PASSWORD=verysecret'
       - 'MYSQL_USER=myuser'
     ports:
-      - '3307:3306'
+      - '3308:3306'
     healthcheck: #Ensures that the MySQL service is fully ready before the web service starts
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s #The health check runs every 10 seconds.
@@ -17,19 +17,21 @@ services:
 
 
   web:
-    image: rbadawy/surgeries:1.0.1
-      #    build:
+    #    image: 'myspringweb'
+    build:
       # Uses the current directory as the build context,
-    # making all files in this directory available during the build process.
-    #      context: .
-    #      dockerfile: Dockerfile
+      # making all files in this directory available during the build process.
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    #      - '35729:35729'
     depends_on:
       mysql:
         # Waits for the service to pass its health checks, ensuring it is fully operational.
         condition: service_healthy
     environment:
+      SPRING_DOCKER_COMPOSE_ENABLED: false
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/surgeries
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: secret
