@@ -151,7 +151,7 @@ public class PatientControllerTests {
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/patients/1")
                 .contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

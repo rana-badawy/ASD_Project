@@ -103,7 +103,5 @@ public class DentistServiceImpl implements DentistService {
 
         if (dentist.isPresent())
             dentistRepository.delete(dentist.get());
-        else
-            throw new NotFoundException("Dentist with id " + dentistId + " not found");
     }
 }
