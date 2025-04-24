@@ -1,5 +1,5 @@
 # Use a lightweight OpenJDK image (Corretto 23 Alpine)
-FROM amazoncorretto:24-alpine
+FROM amazoncorretto:21-alpine
 
 # Set metadata about the image author
 LABEL authors="rana"
