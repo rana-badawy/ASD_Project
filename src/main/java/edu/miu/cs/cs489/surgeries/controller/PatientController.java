@@ -65,7 +65,7 @@ public class PatientController {
     public ResponseEntity<?> deletePatientById(@PathVariable Integer patientId) {
         patientService.deletePatientById(patientId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
