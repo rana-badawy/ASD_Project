@@ -4,10 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import edu.miu.cs.cs489.surgeries.config.JwtFilter;
+import edu.miu.cs.cs489.surgeries.config.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +27,7 @@ import edu.miu.cs.cs489.surgeries.dto.response.PatientResponseDto;
 import edu.miu.cs.cs489.surgeries.service.PatientService;
 
 @WebMvcTest(PatientController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class PatientControllerTests {
     @Autowired
     private MockMvc mockMvc;
@@ -32,6 +36,12 @@ public class PatientControllerTests {
 
     @MockitoBean
     private PatientService patientService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private JwtFilter jwtFilter;
 
 
     private final AddressRequestDto addressRequestDto = new AddressRequestDto("1000 N", "Fairfield", "Iowa", "52556");
