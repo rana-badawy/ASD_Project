@@ -161,5 +161,7 @@ public class PatientServiceImpl implements PatientService {
         if (patient.isPresent()) {
             patientRepository.delete(patient.get());
         }
+
+        throw new NotFoundException("Patient with ID " + patientId + " does not exist");
     }
 }
