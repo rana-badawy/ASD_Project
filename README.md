@@ -120,4 +120,3 @@ This application is fully containerized using Docker, allowing easy deployment a
 
 ## Azure Deployment
 This application is deployed on azure including CI/CD feature and it can be tested through postman with the URL `https://surgeriesappr-atdqhqhqbqhsgkew.centralus-01.azurewebsites.net/api/vi`
-
